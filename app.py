@@ -22,7 +22,7 @@ hide_st_style = """
 load_dotenv()
 OpenAI.api_key = os.getenv("OPENAI_API_KEY") 
 
-def generate_guiding_question(lesson_plan):
+def generate_guiding_question(unit_plan):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -34,7 +34,7 @@ def generate_guiding_question(lesson_plan):
 """},
             {"role": "user", "content": f"""Instructions:
 
-                    Evaluate the following lesson: {lesson_plan}. 
+                    Evaluate the following lesson: {unit_plan}. 
                     Identify the guiding question that will drive the inquiry-based learning in this lesson: Facts, Concepts, and Debatable Questions.
                     For example, a factual question could be: "Why doesn’t energy cycle within an ecosystem?" A conceptual question could be: "In what ways could humans impact the
                     balance of this freshwater ecosystem and its biodiversity?" A debatable question could be: "Using all of the evidence and conclusions you made above, how would you rate the health of the freshwater ecosystem at FEC?"
@@ -45,7 +45,7 @@ def generate_guiding_question(lesson_plan):
 
     return completion.choices[0].message.content
 
-def generate_essential_knowledge(lesson_plan):
+def generate_essential_knowledge(unit_plan):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -56,7 +56,7 @@ def generate_essential_knowledge(lesson_plan):
                 
 """},
             {"role": "user", "content": f"""
-            Review the following inquiry-based lesson plan: {lesson_plan} and identify the essential knowledge that students will acquire through the lesson. 
+            Review the following inquiry-based lesson plan: {unit_plan} and identify the essential knowledge that students will acquire through the lesson. 
             Specificly, outline the required background knowledge, Essential skills needed, and key concpets that student need to know to successfully engage in the inquiry-based learning process.
 
 """}
@@ -65,7 +65,7 @@ def generate_essential_knowledge(lesson_plan):
 
     return completion.choices[0].message.content
 
-def generate_differentiation(lesson_plan):
+def generate_differentiation(unit_plan):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -76,7 +76,7 @@ def generate_differentiation(lesson_plan):
                 
 """},
             {"role": "user", "content": f"""
-            Review the following inquiry-based lesson plan: {lesson_plan} and identify the strategies for differentiation that are embedded in the lesson. 
+            Review the following inquiry-based lesson plan: {unit_plan} and identify the strategies for differentiation that are embedded in the lesson. 
             Specifically, draw from Universal Design for Learning (UDL) principles and describe and recommend how students will communicate their learning in various ways.
             Provide recommendations to ensure learning opportunities are accessible to all students, including those with diverse needs and abilities.
 
@@ -86,7 +86,7 @@ def generate_differentiation(lesson_plan):
 
     return completion.choices[0].message.content
 
-def generate_inquiry_impact(lesson_plan):
+def generate_inquiry_impact(unit_plan):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -97,7 +97,7 @@ def generate_inquiry_impact(lesson_plan):
                 
 """},
             {"role": "user", "content": f"""
-            Review the following inquiry-based lesson plan: {lesson_plan} and identify the real-world impact of the lesson on students' learning and development.
+            Review the following inquiry-based lesson plan: {unit_plan} and identify the real-world impact of the lesson on students' learning and development.
             Also, identify key concepts and skills that are transferable to other contexts and subjects.
 
 """}
@@ -204,37 +204,37 @@ if __name__ == '__main__':
                     The lesson should embed the principles of authentic and meaningful tasks, student-centered learning, collaborative learning, an interdisciplinary approach, 
                     critical thinking and problem-solving, ongoing assessment and feedback, the teacher as facilitator, and reflective practice. 
     """
-    if st.sidebar.button("Generate Lesson Plan", type="primary"):
-        st.subheader("Lesson Plan")
-        lesson_plan = generate_inquiry(prompt)
-        st.write(lesson_plan)
-        ste.download_button("Download Lesson Plan", lesson_plan, "Lesson_Plan.txt")
+    if st.sidebar.button("Generate Unit", type="primary"):
+        st.subheader("Unit Plan")
+        unit_plan = generate_inquiry(prompt)
+        st.write(unit_plan)
+        ste.download_button("Download Unit Plan", unit_plan, "Unit_Plan.txt")
         st.divider()
         st.subheader("Assessment Plan")
-        assessment_plan = generate_assessment(lesson_plan)
+        assessment_plan = generate_assessment(unit_plan)
         st.write(assessment_plan)
         ste.download_button("Download Assessment Plan", assessment_plan, "Assessment_Plan.txt")
         st.divider()
         col1, col2 = st.columns(2)
         with col1:
             st.subheader("Guiding Question")
-            guiding_question = generate_guiding_question(lesson_plan)
+            guiding_question = generate_guiding_question(unit_plan)
             st.write(guiding_question)
             ste.download_button("Download Guiding Question", guiding_question, "Guiding_Question.txt")
         with col2:
             st.subheader("Inquiry Impact")
-            inquiry_impact = generate_inquiry_impact(lesson_plan)
+            inquiry_impact = generate_inquiry_impact(unit_plan)
             st.write(inquiry_impact)
             ste.download_button("Download Inquiry Impact", inquiry_impact, "Inquiry_Impact.txt")
         col3, col4 = st.columns(2)
         with col3:
             st.subheader("Essential Knowledge")
-            essential_knowledge = generate_essential_knowledge(lesson_plan)
+            essential_knowledge = generate_essential_knowledge(unit_plan)
             st.write(essential_knowledge)
             ste.download_button("Download Essential Knowledge", essential_knowledge, "Essential_Knowledge.txt")
         with col4:
             st.subheader("Differentiation")
-            differentiation = generate_differentiation(lesson_plan)
+            differentiation = generate_differentiation(unit_plan)
             st.write(differentiation)
             ste.download_button("Download Differentiation", differentiation, "Differentiation.txt")
 
