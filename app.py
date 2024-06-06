@@ -192,7 +192,7 @@ if __name__ == '__main__':
     st.sidebar.write("Would you like to add a bit more to the context?")
     on = st.sidebar.toggle("Yes", value=False)
     if on: 
-            user_context = st.sidebar.text_area("Please provide context that you would like to be included in the case.")
+            user_context = st.sidebar.text_area("Please provide context that you would like to be included in the unit plan.")
             prompt = f"""Develop an inquiry-based lesson plan for {grade} that aligns with the following curricular outcomes: {outcomes}.
                         The lesson should embed the principles of authentic and meaningful tasks, student-centered learning, collaborative learning, an interdisciplinary approach, 
                         critical thinking and problem-solving, ongoing assessment and feedback, the teacher as facilitator, and reflective practice. 
