@@ -119,7 +119,7 @@ def generate_inquiry(prompt):
 
                 Authentic and Meaningful Tasks:
 
-                Design tasks that are relevant and meaningful to students' lives, connecting to real-world problems particulary in the Canadian context. Ensure the tasks promote engagement and foster a deeper understanding of the subject matter.
+                Design tasks that are relevant and meaningful to students' lives, connecting to real-world problems particularly in the Canadian context. Ensure the tasks promote engagement and foster a deeper understanding of the subject matter.
                 Student-Centered Learning:
 
                 Create opportunities for students to take an active role in their learning. Encourage them to pose questions, investigate solutions, and construct their own understanding. Outline activities that allow for student choice and voice.
