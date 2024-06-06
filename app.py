@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 
 #page setting
-st.set_page_config(page_title="Inquiry Unit Planer", page_icon="🤖", initial_sidebar_state="expanded", layout="wide")
+st.set_page_config(page_title="Inquiry Unit Planner", page_icon="🤖", initial_sidebar_state="expanded", layout="wide")
 
 hide_st_style = """
         <style>
@@ -57,7 +57,7 @@ def generate_essential_knowledge(unit_plan):
 """},
             {"role": "user", "content": f"""
             Review the following inquiry-based lesson plan: {unit_plan} and identify the essential knowledge that students will acquire through the lesson. 
-            Specificly, outline the required background knowledge, Essential skills needed, and key concpets that student need to know to successfully engage in the inquiry-based learning process.
+            Specifically, outline the required background knowledge, Essential skills needed, and key concepts that student need to know to successfully engage in the inquiry-based learning processes.
 
 """}
         ]
@@ -163,7 +163,7 @@ def generate_assessment(lesson):
 
                 Design an assessment plan that aligns with the inquiry-based lesson plan you have created. 
                 Ensure the assessment is authentic, meaningful, and aligned with the curricular outcomes and the principles of inquiry-based learning. 
-                Ensure to include the following components in your assessment plan: opportunities for for assessment of learning, assessment for learning, and assessment as learning. 
+                Ensure to include the following components in your assessment plan: opportunities for assessment of learning, assessment for learning, and assessment as learning. 
                 Plan for ongoing assessment and feedback that supports student learning and growth. 
                 Describe how the assessment will be used to evaluate student progress and inform instruction. 
                 
@@ -179,7 +179,7 @@ def generate_assessment(lesson):
 if __name__ == '__main__':
     
     #Sidebar settings
-    st.sidebar.header("Unit Plan Generator")
+    st.sidebar.header("Unit Planner")
     st.sidebar.write("Please provide the following information to generate an inquiry-based lesson plan.")
     st.sidebar.divider()
     grade = st.sidebar.text_input("Grade Level", "e.g., Grade 7")
