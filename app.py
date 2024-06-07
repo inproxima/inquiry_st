@@ -235,7 +235,7 @@ def generate_assessment(lesson):
                 
 
 """},
-            {"role": "user", "content": lesson}
+            {"role": "user", "content": f"The following is the Unit plan: {lesson}." }
         ]
     )
 
@@ -281,15 +281,15 @@ if __name__ == '__main__':
         st.write(unit_plan)
         ste.download_button("Download Unit Plan", unit_plan, "Unit_Plan.txt")
         st.divider()
-        st.subheader("Essential Knowledge")
+        st.subheader("Student Essential Knowledge")
         essential_knowledge = generate_essential_knowledge(unit_plan)
         st.write(essential_knowledge)
-        ste.download_button("Download Essential Knowledge", essential_knowledge, "Essential_Knowledge.txt")
+        ste.download_button("Download StudentEssential Knowledge", essential_knowledge, "Student_Essential_Knowledge.txt")
         st.divider()
-        st.subheader("Teacher Knowledge")
+        st.subheader("Teacher Essential Knowledge")
         teacher_knowledge = generate_teacher_knowledge(unit_plan)
         st.write(teacher_knowledge)
-        ste.download_button("Download Teacher Knowledge", teacher_knowledge, "Teacher_Knowledge.txt")
+        ste.download_button("Download Teacher Essential Knowledge", teacher_knowledge, "Teacher_Essential_Knowledge.txt")
         st.divider()
         st.subheader("Assessment Plan")
         assessment_plan = generate_assessment(unit_plan)
@@ -311,10 +311,10 @@ if __name__ == '__main__':
         st.write(ipad)
         ste.download_button("Download iPad Integration", ipad, "iPad_Integration.txt")
         st.divider()
-        st.subheader("Western Views")
+        st.subheader("Western Views Analysis")
         western_views = generate_western_views(unit_plan)
         st.write(western_views)
-        ste.download_button("Download Western Views", western_views, "Western_Views.txt")
+        ste.download_button("Download Western Views", western_views, "Western_Views_Analysis.txt")
         
 
 
