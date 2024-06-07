@@ -162,6 +162,7 @@ def generate_teacher_knowledge(unit_plan):
             {"role": "user", "content": f"""
             Review the following inquiry-based lesson plan: {unit_plan} and identify the knowledge and skills that teachers need to effectively implement the lesson.
             Outline the subject-specific knowledge that teachers need to support students' inquiry-based learning.
+            Ensure not to providde pedagogical strategies in this response.
 
 """}
         ]
@@ -280,39 +281,35 @@ if __name__ == '__main__':
         st.write(assessment_plan)
         ste.download_button("Download Assessment Plan", assessment_plan, "Assessment_Plan.txt")
         st.divider()
-        col1, col2 = st.columns(2)
-        with col1:
-            st.subheader("Guiding Question")
-            guiding_question = generate_guiding_question(unit_plan)
-            st.write(guiding_question)
-            ste.download_button("Download Guiding Question", guiding_question, "Guiding_Question.txt")
-        with col2:
-            st.subheader("Inquiry Impact")
-            inquiry_impact = generate_inquiry_impact(unit_plan)
-            st.write(inquiry_impact)
-            ste.download_button("Download Inquiry Impact", inquiry_impact, "Inquiry_Impact.txt")
-        col3, col4 = st.columns(2)
-        with col3:
-            st.subheader("Essential Knowledge")
-            essential_knowledge = generate_essential_knowledge(unit_plan)
-            st.write(essential_knowledge)
-            ste.download_button("Download Essential Knowledge", essential_knowledge, "Essential_Knowledge.txt")
-        with col4:
-            st.subheader("Differentiation")
-            differentiation = generate_differentiation(unit_plan)
-            st.write(differentiation)
-            ste.download_button("Download Differentiation", differentiation, "Differentiation.txt")
-        col5, col6 = st.columns(2)
-        with col5:
-            st.subheader("iPad Integration")
-            ipad = generate_ipad(unit_plan)
-            st.write(ipad)
-            ste.download_button("Download iPad Integration", ipad, "iPad_Integration.txt")
-        with col6:
-            st.subheader("Western Views")
-            western_views = generate_western_views(unit_plan)
-            st.write(western_views)
-            ste.download_button("Download Western Views", western_views, "Western_Views.txt")
+        st.subheader("Guiding Question")
+        guiding_question = generate_guiding_question(unit_plan)
+        st.write(guiding_question)
+        ste.download_button("Download Guiding Question", guiding_question, "Guiding_Question.txt")
+        st.divider()
+        st.subheader("Inquiry Impact")
+        inquiry_impact = generate_inquiry_impact(unit_plan)
+        st.write(inquiry_impact)
+        ste.download_button("Download Inquiry Impact", inquiry_impact, "Inquiry_Impact.txt")
+        st.divider()
+        st.subheader("Essential Knowledge")
+        essential_knowledge = generate_essential_knowledge(unit_plan)
+        st.write(essential_knowledge)
+        ste.download_button("Download Essential Knowledge", essential_knowledge, "Essential_Knowledge.txt")
+        st.divider()
+        st.subheader("Differentiation")
+        differentiation = generate_differentiation(unit_plan)
+        st.write(differentiation)
+        ste.download_button("Download Differentiation", differentiation, "Differentiation.txt")
+        st.divider()
+        st.subheader("iPad Integration")
+        ipad = generate_ipad(unit_plan)
+        st.write(ipad)
+        ste.download_button("Download iPad Integration", ipad, "iPad_Integration.txt")
+        st.divider()
+        st.subheader("Western Views")
+        western_views = generate_western_views(unit_plan)
+        st.write(western_views)
+        ste.download_button("Download Western Views", western_views, "Western_Views.txt")
         st.divider()
         st.subheader("Teacher Knowledge")
         teacher_knowledge = generate_teacher_knowledge(unit_plan)
