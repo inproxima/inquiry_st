@@ -57,7 +57,8 @@ def generate_essential_knowledge(unit_plan):
 """},
             {"role": "user", "content": f"""
             Review the following inquiry-based lesson plan: {unit_plan} and identify the essential knowledge that students will acquire through the lesson. 
-            Specifically, outline the required background knowledge, Essential skills needed, and key concepts that student need to know to successfully engage in the inquiry-based learning processes.
+            Specifically, outline the required background knowledge, essential skills needed, and key concepts that student need to know to successfully engage in the inquiry-based learning processes.
+            Also, identify the teachers knowledge and skills that are required to facilitate the lesson effectively.
 
 """}
         ]
@@ -98,7 +99,50 @@ def generate_inquiry_impact(unit_plan):
 """},
             {"role": "user", "content": f"""
             Review the following inquiry-based lesson plan: {unit_plan} and identify the real-world impact of the lesson on students' learning and development.
-            Also, identify key concepts and skills that are transferable to other contexts and subjects.
+            Generate recommendations on how exemplary citizenship, social responsibility, and ethical considerations enacted beyond the school context.             
+            Identify key concepts and skills that are transferable to other contexts and subjects.
+            Assuming that the lesson is complete, generate debriefing questions that will help students reflect on their learning and the impact of the inquiry-based lesson.
+
+"""}
+        ]
+    )
+
+    return completion.choices[0].message.content
+
+def generate_ipad(unit_plan):
+    client = OpenAI()
+
+    completion = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": f"""
+                You are an expert in inquiry-based lesson plan design in any scenario.
+                
+"""},
+            {"role": "user", "content": f"""
+            Review the following inquiry-based lesson plan: {unit_plan} and assuming that the context is using iPads in the classroom, generate recommendations on how to integrate technology to support inquiry-based learning.
+            Use the SAMR model to describe how technology can be used to enhance the lesson and provide opportunities for students to engage in higher-order thinking and creativity.
+            
+
+"""}
+        ]
+    )
+
+    return completion.choices[0].message.content
+
+def generate_western_views(unit_plan):
+    client = OpenAI()
+
+    completion = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": f"""
+                You are an expert in inquiry-based lesson plan design in any scenario.
+                
+"""},
+            {"role": "user", "content": f"""
+            Review the following inquiry-based lesson plan: {unit_plan} and highlight how the unit plan amplifies Western views and perspectives.
+            Generate recommendations on how to incorporate worldviews into the lesson to provide a more inclusive and diverse learning experience.
 
 """}
         ]
@@ -131,7 +175,7 @@ def generate_inquiry(prompt):
                 Integrate multiple disciplines into the lesson plan, allowing students to see connections and apply knowledge in various contexts. Ensure the lesson draws on concepts from different subject areas to provide a holistic learning experience.
                 Critical Thinking and Problem Solving:
 
-                Develop activities that encourage students to think critically, question assumptions, analyze information, and solve complex problems. Include scenarios or problems that require deep thinking and innovative solutions.
+                Develop activities that encourage students to think critically, question assumptions, analyze information, and solve complex problems. Include scenarios or problems that require deep thinking and innovative solutions. 
                 Ongoing Assessment and Feedback:
 
                 Integrate assessment into the learning process, providing ongoing feedback to guide students' inquiry and deepen their understanding. Plan formative assessments, peer reviews, and reflective activities that help monitor progress.
@@ -237,6 +281,17 @@ if __name__ == '__main__':
             differentiation = generate_differentiation(unit_plan)
             st.write(differentiation)
             ste.download_button("Download Differentiation", differentiation, "Differentiation.txt")
+        col5, col6 = st.columns(2)
+        with col5:
+            st.subheader("iPad Integration")
+            ipad = generate_ipad(unit_plan)
+            st.write(ipad)
+            ste.download_button("Download iPad Integration", ipad, "iPad_Integration.txt")
+        with col6:
+            st.subheader("Western Views")
+            western_views = generate_western_views(unit_plan)
+            st.write(western_views)
+            ste.download_button("Download Western Views", western_views, "Western_Views.txt")
 
 
     #Sidebar settings
