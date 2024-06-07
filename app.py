@@ -58,8 +58,7 @@ def generate_essential_knowledge(unit_plan):
             {"role": "user", "content": f"""
             Review the following inquiry-based lesson plan: {unit_plan} and identify the essential knowledge that students will acquire through the lesson. 
             Specifically, outline the required background knowledge, essential skills needed, and key concepts that student need to know to successfully engage in the inquiry-based learning processes.
-            Also, identify the teachers knowledge and skills that are required to facilitate the lesson effectively.
-
+            
 """}
         ]
     )
@@ -149,6 +148,28 @@ def generate_western_views(unit_plan):
     )
 
     return completion.choices[0].message.content
+
+def generate_teacher_knowledge(unit_plan):
+    client = OpenAI()
+
+    completion = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": f"""
+                You are an expert in inquiry-based lesson plan design in any scenario.
+                
+"""},
+            {"role": "user", "content": f"""
+            Review the following inquiry-based lesson plan: {unit_plan} and identify the knowledge and skills that teachers need to effectively implement the lesson.
+            Outline the subject-specific knowledge that teachers need to support students' inquiry-based learning.
+
+"""}
+        ]
+    )
+
+    return completion.choices[0].message.content
+
+
 
 def generate_inquiry(prompt):
     client = OpenAI()
@@ -292,6 +313,11 @@ if __name__ == '__main__':
             western_views = generate_western_views(unit_plan)
             st.write(western_views)
             ste.download_button("Download Western Views", western_views, "Western_Views.txt")
+        st.divider()
+        st.subheader("Teacher Knowledge")
+        teacher_knowledge = generate_teacher_knowledge(unit_plan)
+        st.write(teacher_knowledge)
+        ste.download_button("Download Teacher Knowledge", teacher_knowledge, "Teacher_Knowledge.txt")
 
 
     #Sidebar settings
