@@ -22,7 +22,7 @@ hide_st_style = """
 load_dotenv()
 OpenAI.api_key = os.getenv("OPENAI_API_KEY") 
 
-def generate_guiding_question(unit_plan):
+def generate_guiding_question(unit_plan, temperature):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -40,12 +40,13 @@ def generate_guiding_question(unit_plan):
                     balance of this freshwater ecosystem and its biodiversity?" A debatable question could be: "Using all of the evidence and conclusions you made above, how would you rate the health of the freshwater ecosystem at FEC?"
                     """
                     }
-        ]
+        ], 
+        temperature=temperature
     )
 
     return completion.choices[0].message.content
 
-def generate_essential_knowledge(unit_plan):
+def generate_essential_knowledge(unit_plan, temperature):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -60,12 +61,13 @@ def generate_essential_knowledge(unit_plan):
             Specifically, outline the required background knowledge, essential skills needed, and key concepts that student need to know to successfully engage in the inquiry-based learning processes.
             
 """}
-        ]
+        ], 
+        temperature=temperature
     )
 
     return completion.choices[0].message.content
 
-def generate_differentiation(unit_plan):
+def generate_differentiation(unit_plan, temperature):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -81,12 +83,13 @@ def generate_differentiation(unit_plan):
             Provide recommendations to ensure learning opportunities are accessible to all students, including those with diverse needs and abilities.
 
 """}
-        ]
+        ], 
+        temperature=temperature
     )
 
     return completion.choices[0].message.content
 
-def generate_inquiry_impact(unit_plan):
+def generate_inquiry_impact(unit_plan, temperature):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -103,12 +106,13 @@ def generate_inquiry_impact(unit_plan):
             Assuming that the lesson is complete, generate debriefing questions that will help students reflect on their learning and the impact of the inquiry-based lesson.
 
 """}
-        ]
+        ], 
+        temperature=temperature
     )
 
     return completion.choices[0].message.content
 
-def generate_ipad(unit_plan):
+def generate_ipad(unit_plan, temperature):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -124,12 +128,13 @@ def generate_ipad(unit_plan):
             
 
 """}
-        ]
+        ], 
+        temperature=temperature
     )
 
     return completion.choices[0].message.content
 
-def generate_western_views(unit_plan):
+def generate_western_views(unit_plan, temperature):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -144,12 +149,13 @@ def generate_western_views(unit_plan):
             Generate recommendations on how to incorporate worldviews into the lesson to provide a more inclusive and diverse learning experience.
 
 """}
-        ]
+        ], 
+        temperature=temperature
     )
 
     return completion.choices[0].message.content
 
-def generate_teacher_knowledge(unit_plan):
+def generate_teacher_knowledge(unit_plan, temperature):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -165,14 +171,15 @@ def generate_teacher_knowledge(unit_plan):
             Ensure not to providde pedagogical strategies in this response.
 
 """}
-        ]
+        ], 
+        temperature=temperature
     )
 
     return completion.choices[0].message.content
 
 
 
-def generate_inquiry(prompt):
+def generate_inquiry(prompt, temperature):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -211,12 +218,13 @@ def generate_inquiry(prompt):
                 Ensure not to provide an assessment component in this response.
 """},
             {"role": "user", "content": prompt}
-        ]
+        ], 
+        temperature=temperature
     )
 
     return completion.choices[0].message.content
 
-def generate_assessment(lesson):
+def generate_assessment(lesson, temperature):
     client = OpenAI()
 
     completion = client.chat.completions.create(
@@ -236,7 +244,8 @@ def generate_assessment(lesson):
 
 """},
             {"role": "user", "content": f"The following is the Unit plan: {lesson}." }
-        ]
+        ], 
+        temperature=temperature
     )
 
     return completion.choices[0].message.content
@@ -249,6 +258,7 @@ if __name__ == '__main__':
     st.sidebar.write("Please provide the following information to generate an inquiry-based lesson plan.")
     st.sidebar.divider()
     grade = st.sidebar.text_input("Grade Level", "e.g., Grade 7")
+    temperature = st.sidebar.slider("Temperature", min_value=0.00, max_value=1.00, value=0.85)
     outcomes = st.sidebar.text_area("curriculum outcomes", "e.g, Students will be able to analyze the impact of cyberbullying on individuals and communities.")
     #prompts
     
@@ -271,9 +281,9 @@ if __name__ == '__main__':
                     critical thinking and problem-solving, ongoing assessment and feedback, the teacher as facilitator, and reflective practice. 
     """
     if st.sidebar.button("Generate Unit", type="primary"):
-        unit_plan = generate_inquiry(prompt)
+        unit_plan = generate_inquiry(prompt, temperature)
         st.subheader("Guiding Question")
-        guiding_question = generate_guiding_question(unit_plan)
+        guiding_question = generate_guiding_question(unit_plan, temperature)
         st.write(guiding_question)
         ste.download_button("Download Guiding Question", guiding_question, "Guiding_Question.txt")
         st.divider()
@@ -282,37 +292,37 @@ if __name__ == '__main__':
         ste.download_button("Download Unit Plan", unit_plan, "Unit_Plan.txt")
         st.divider()
         st.subheader("Student Essential Knowledge")
-        essential_knowledge = generate_essential_knowledge(unit_plan)
+        essential_knowledge = generate_essential_knowledge(unit_plan, temperature)
         st.write(essential_knowledge)
         ste.download_button("Download StudentEssential Knowledge", essential_knowledge, "Student_Essential_Knowledge.txt")
         st.divider()
         st.subheader("Teacher Essential Knowledge")
-        teacher_knowledge = generate_teacher_knowledge(unit_plan)
+        teacher_knowledge = generate_teacher_knowledge(unit_plan, temperature)
         st.write(teacher_knowledge)
         ste.download_button("Download Teacher Essential Knowledge", teacher_knowledge, "Teacher_Essential_Knowledge.txt")
         st.divider()
         st.subheader("Assessment Plan")
-        assessment_plan = generate_assessment(unit_plan)
+        assessment_plan = generate_assessment(unit_plan, temperature)
         st.write(assessment_plan)
         ste.download_button("Download Assessment Plan", assessment_plan, "Assessment_Plan.txt")
         st.divider()
         st.subheader("Inquiry Impact")
-        inquiry_impact = generate_inquiry_impact(unit_plan)
+        inquiry_impact = generate_inquiry_impact(unit_plan, temperature)
         st.write(inquiry_impact)
         ste.download_button("Download Inquiry Impact", inquiry_impact, "Inquiry_Impact.txt")
         st.divider()
         st.subheader("Differentiation")
-        differentiation = generate_differentiation(unit_plan)
+        differentiation = generate_differentiation(unit_plan, temperature)
         st.write(differentiation)
         ste.download_button("Download Differentiation", differentiation, "Differentiation.txt")
         st.divider()
         st.subheader("iPad Integration")
-        ipad = generate_ipad(unit_plan)
+        ipad = generate_ipad(unit_plan, temperature)
         st.write(ipad)
         ste.download_button("Download iPad Integration", ipad, "iPad_Integration.txt")
         st.divider()
         st.subheader("Western Views Analysis")
-        western_views = generate_western_views(unit_plan)
+        western_views = generate_western_views(unit_plan, temperature)
         st.write(western_views)
         ste.download_button("Download Western Views", western_views, "Western_Views_Analysis.txt")
         
@@ -331,7 +341,7 @@ if __name__ == '__main__':
     """
     )
     st.sidebar.header("Version")
-    st.sidebar.markdown('June 5th, 2024 - Version 1.0')
+    st.sidebar.markdown('June 28th, 2024')
 
     
 
