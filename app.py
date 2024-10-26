@@ -4,6 +4,7 @@ import streamlit as st
 import streamlit_ext as ste
 import os
 from dotenv import load_dotenv
+import anthropic
 
 
 #page setting
@@ -16,22 +17,22 @@ hide_st_style = """
             header {visibility: hidden;}
         </style>
 """
-#st.markdown(hide_st_style, unsafe_allow_html=True)
 
 #OpenAI APA Key
 load_dotenv()
-OpenAI.api_key = os.getenv("OPENAI_API_KEY") 
+OpenAI.api_key = os.getenv("OPENAI_API_KEY")
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-def generate_guiding_question(unit_plan, temperature):
-    client = OpenAI()
+def generate_guiding_question_claude(unit_plan, temperature):
 
-    completion = client.chat.completions.create(
-        model="gpt-4o",
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system="""
+        You are an expert in inquiry-based lesson plan design in any scenario.
+        """,
         messages=[
-            {"role": "system", "content": """
-                You are an expert in inquiry-based learning.
-            
-"""},
             {"role": "user", "content": f"""Instructions:
 
                     Evaluate the following lesson: {unit_plan}. 
@@ -41,15 +42,264 @@ def generate_guiding_question(unit_plan, temperature):
                     """
                     }
         ], 
-        temperature=temperature
+        
     )
 
-    return completion.choices[0].message.content
+    return completion.content[0].text
+
+def generate_essential_knowledge_claude(unit_plan, temperature):
+    
+
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system="""
+        You are an expert in inquiry-based lesson plan design in any scenario.
+        """,
+        messages=[
+            {"role": "user", "content": f"""
+            Review the following inquiry-based lesson plan: {unit_plan} and identify the essential knowledge that students will acquire through the lesson. 
+            Specifically, outline the required background knowledge, essential skills needed, and key concepts that student need to know to successfully engage in the inquiry-based learning processes.
+            
+"""}
+        ], 
+        
+    )
+
+    return completion.content[0].text
+
+def generate_differentiation_claude(unit_plan, temperature):
+    
+
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system="""
+        You are an expert in inquiry-based lesson plan design in any scenario.
+        """,
+        messages=[
+            {"role": "user", "content": f"""
+            Review the following inquiry-based lesson plan: {unit_plan} and identify the strategies for differentiation that are embedded in the lesson. 
+            Specifically, draw from Universal Design for Learning (UDL) principles and describe and recommend how students will communicate their learning in various ways.
+            Provide recommendations to ensure learning opportunities are accessible to all students, including those with diverse needs and abilities.
+
+"""}
+        ], 
+
+    )
+
+    return completion.content[0].text
+
+def generate_inquiry_impact_claude(unit_plan, temperature):
+    
+
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system="""
+        You are an expert in inquiry-based lesson plan design in any scenario.
+        """,
+        messages=[
+            
+            {"role": "user", "content": f"""
+            Review the following inquiry-based lesson plan: {unit_plan} and identify the real-world impact of the lesson on students' learning and development.
+            Generate recommendations on how exemplary citizenship, social responsibility, and ethical considerations enacted beyond the school context.             
+            Identify key concepts and skills that are transferable to other contexts and subjects.
+            Assuming that the lesson is complete, generate debriefing questions that will help students reflect on their learning and the impact of the inquiry-based lesson.
+
+"""}
+        ], 
+        
+    )
+
+    return completion.content[0].text
+
+def generate_ipad_claude(unit_plan, temperature):
+    
+
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system="""
+        You are an expert in inquiry-based lesson plan design in any scenario.
+        """,
+        messages=[
+            {"role": "user", "content": f"""
+            Review the following inquiry-based lesson plan: {unit_plan} and assuming that the context is using iPads in the classroom, generate recommendations on how to integrate technology to support inquiry-based learning.
+            Use the SAMR model to describe how technology can be used to enhance the lesson and provide opportunities for students to engage in higher-order thinking and creativity.
+            
+
+"""}
+        ], 
+
+    )
+
+    return completion.content[0].text
+
+def generate_western_views_claude(unit_plan, temperature):
+    
+
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system="""
+        You are an expert in inquiry-based lesson plan design in any scenario.
+        """,
+        messages=[
+            {"role": "user", "content": f"""
+            Review the following inquiry-based lesson plan: {unit_plan} and highlight how the unit plan amplifies Western views and perspectives.
+            Generate recommendations on how to incorporate worldviews into the lesson to provide a more inclusive and diverse learning experience.
+
+"""}
+        ], 
+        
+    )
+
+    return completion.content[0].text
+
+def generate_teacher_knowledge_claude(unit_plan, temperature):
+    
+
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system="""
+        You are an expert in inquiry-based lesson plan design in any scenario.
+        """,
+        messages=[
+            {"role": "user", "content": f"""
+            Review the following inquiry-based lesson plan: {unit_plan} and identify the knowledge and skills that teachers need to effectively implement the lesson.
+            Outline the subject-specific knowledge that teachers need to support students' inquiry-based learning.
+            Ensure not to providde pedagogical strategies in this response.
+
+"""}
+        ], 
+        
+    )
+
+    return completion.content[0].text
+
+
+
+def generate_inquiry_claude(prompt, temperature):
+    
+
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system=f"""
+                You are in expert in inquiry-based lesson plan design in any scenario.
+                
+                Instructions:
+
+                Authentic and Meaningful Tasks:
+
+                Design tasks that are relevant and meaningful to students' lives, connecting to real-world problems particularly in the Canadian context. Ensure the tasks promote engagement and foster a deeper understanding of the subject matter.
+                Student-Centered Learning:
+
+                Create opportunities for students to take an active role in their learning. Encourage them to pose questions, investigate solutions, and construct their own understanding. Outline activities that allow for student choice and voice.
+                Collaborative Learning:
+
+                Incorporate activities that promote learning as a social process. Plan for students to collaborate with peers, teachers, and experts, sharing ideas and constructing knowledge collectively. Include group projects or discussions that require teamwork.
+                Interdisciplinary Approach:
+
+                Integrate multiple disciplines into the lesson plan, allowing students to see connections and apply knowledge in various contexts. Ensure the lesson draws on concepts from different subject areas to provide a holistic learning experience.
+                Critical Thinking and Problem Solving:
+
+                Develop activities that encourage students to think critically, question assumptions, analyze information, and solve complex problems. Include scenarios or problems that require deep thinking and innovative solutions. 
+                Ongoing Assessment and Feedback:
+
+                Integrate assessment into the learning process, providing ongoing feedback to guide students' inquiry and deepen their understanding. Plan formative assessments, peer reviews, and reflective activities that help monitor progress.
+                Teacher as Facilitator:
+
+                Outline the teacher's role in guiding and supporting students' inquiries. Describe how the teacher will provide resources, ask probing questions, and scaffold learning as needed to help students reach their goals.
+                Reflective Practice:
+
+                Include opportunities for both students and teachers to engage in reflection. Plan activities where students can assess their learning process, outcomes, and their roles within it. Describe how the teacher will facilitate reflection to promote continuous improvement.
+             
+                Ensure not to provide an assessment component in this response.
+""",
+        messages=[
+            {"role": "user", "content": prompt}
+        ], 
+        
+    )
+
+    return completion.content[0].text
+
+def generate_assessment_claude(lesson, temperature):
+    
+
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system=
+        f"""
+                You are an expert in assessment design for inquiry-based lesson plans.
+                
+                Instructions:
+
+                Design an assessment plan that aligns with the inquiry-based lesson plan you have created. 
+                Ensure the assessment is authentic, meaningful, and aligned with the curricular outcomes and the principles of inquiry-based learning. 
+                Ensure to include the following components in your assessment plan: opportunities for assessment of learning, assessment for learning, and assessment as learning. 
+                Plan for ongoing assessment and feedback that supports student learning and growth. 
+                Describe how the assessment will be used to evaluate student progress and inform instruction. 
+                
+
+""",
+        
+        messages=[
+            {"role": "user", "content": f"The following is the Unit plan: {lesson}." }
+        ], 
+        
+    )
+
+    return completion.content[0].text
+
+
+
+def generate_guiding_question(unit_plan, temperature):
+    """Primary function using GPT-4"""
+    try:
+        client = OpenAI()
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": """
+                    You are an expert in inquiry-based learning.
+                """},
+                {"role": "user", "content": f"""Instructions:
+                        Evaluate the following lesson: {unit_plan}. 
+                        Identify the guiding question that will drive the inquiry-based learning in this lesson: Facts, Concepts, and Debatable Questions.
+                        For example, a factual question could be: "Why doesn't energy cycle within an ecosystem?" A conceptual question could be: "In what ways could humans impact the
+                        balance of this freshwater ecosystem and its biodiversity?" A debatable question could be: "Using all of the evidence and conclusions you made above, how would you rate the health of the freshwater ecosystem at FEC?"
+                        """
+                }
+            ], 
+            temperature=temperature
+        )
+        return completion.choices[0].message.content
+        
+    except Exception:
+        try:
+            return generate_guiding_question_claude(unit_plan, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
+
 
 def generate_essential_knowledge(unit_plan, temperature):
-    client = OpenAI()
-
-    completion = client.chat.completions.create(
+    """Primary function using GPT-4"""
+    try:
+        client = OpenAI()
+        completion = client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": f"""
@@ -65,15 +315,22 @@ def generate_essential_knowledge(unit_plan, temperature):
         temperature=temperature
     )
 
-    return completion.choices[0].message.content
+        return completion.choices[0].message.content
+    except Exception:
+        try:
+            return generate_essential_knowledge_claude(unit_plan, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 def generate_differentiation(unit_plan, temperature):
-    client = OpenAI()
+    """Primary function using GPT-4"""
+    try:
+        client = OpenAI()
 
-    completion = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": f"""
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": f"""
                 You are an expert in inquiry-based lesson plan design in any scenario.
                 
 """},
@@ -87,12 +344,19 @@ def generate_differentiation(unit_plan, temperature):
         temperature=temperature
     )
 
-    return completion.choices[0].message.content
+        return completion.choices[0].message.content
+    except Exception:
+        try:
+            return generate_differentiation_claude(unit_plan, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 def generate_inquiry_impact(unit_plan, temperature):
-    client = OpenAI()
+    """Primary function using GPT-4"""
+    try:
+        client = OpenAI()
 
-    completion = client.chat.completions.create(
+        completion = client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": f"""
@@ -110,12 +374,19 @@ def generate_inquiry_impact(unit_plan, temperature):
         temperature=temperature
     )
 
-    return completion.choices[0].message.content
+        return completion.choices[0].message.content
+    except Exception:
+        try:
+            return generate_inquiry_impact_claude(unit_plan, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 def generate_ipad(unit_plan, temperature):
-    client = OpenAI()
+    """Primary function using GPT-4"""
+    try:
+        client = OpenAI()
 
-    completion = client.chat.completions.create(
+        completion = client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": f"""
@@ -132,13 +403,20 @@ def generate_ipad(unit_plan, temperature):
         temperature=temperature
     )
 
-    return completion.choices[0].message.content
+        return completion.choices[0].message.content
+    except Exception:
+        try:
+            return generate_ipad_claude(unit_plan, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 def generate_western_views(unit_plan, temperature):
-    client = OpenAI()
-
-    completion = client.chat.completions.create(
-        model="gpt-4o",
+    """Primary function using GPT-4"""
+    try:
+        client = OpenAI()
+    
+        completion = client.chat.completions.create(
+            model="gpt-4o",
         messages=[
             {"role": "system", "content": f"""
                 You are an expert in inquiry-based lesson plan design in any scenario.
@@ -153,13 +431,20 @@ def generate_western_views(unit_plan, temperature):
         temperature=temperature
     )
 
-    return completion.choices[0].message.content
+        return completion.choices[0].message.content
+    except Exception:
+        try:
+            return generate_western_views_claude(unit_plan, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 def generate_teacher_knowledge(unit_plan, temperature):
-    client = OpenAI()
+    """Primary function using GPT-4"""
+    try:
+        client = OpenAI()
 
-    completion = client.chat.completions.create(
-        model="gpt-4o",
+        completion = client.chat.completions.create(
+            model="gpt-4o",
         messages=[
             {"role": "system", "content": f"""
                 You are an expert in inquiry-based lesson plan design in any scenario.
@@ -175,16 +460,23 @@ def generate_teacher_knowledge(unit_plan, temperature):
         temperature=temperature
     )
 
-    return completion.choices[0].message.content
+        return completion.choices[0].message.content
+    except Exception:   
+        try:
+            return generate_teacher_knowledge_claude(unit_plan, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 
 
 def generate_inquiry(prompt, temperature):
-    client = OpenAI()
+    """Primary function using GPT-4"""
+    try:
+        client = OpenAI()
 
-    completion = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
             {"role": "system", "content": f"""
                 You are in expert in inquiry-based lesson plan design in any scenario.
                 
@@ -222,14 +514,21 @@ def generate_inquiry(prompt, temperature):
         temperature=temperature
     )
 
-    return completion.choices[0].message.content
+        return completion.choices[0].message.content    
+    except Exception:
+        try:
+            return generate_inquiry_claude(prompt, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 def generate_assessment(lesson, temperature):
-    client = OpenAI()
+    """Primary function using GPT-4"""
+    try:
+        client = OpenAI()
 
-    completion = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
             {"role": "system", "content": """
                 You are an expert in assessment design for inquiry-based lesson plans.
                 
@@ -248,7 +547,12 @@ def generate_assessment(lesson, temperature):
         temperature=temperature
     )
 
-    return completion.choices[0].message.content
+        return completion.choices[0].message.content
+    except Exception:
+        try:
+            return generate_assessment_claude(lesson, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 
 if __name__ == '__main__':
@@ -337,11 +641,11 @@ if __name__ == '__main__':
     st.sidebar.markdown(
     """
     This application was created by [add peopel] using [Streamlit](https://streamlit.io/) . It is powered by [OpenAI API](https://openai.com/api/)'s 
-    [GPT-4o API](https://platform.openai.com/docs/models/overview) for educational purposes. 
+    [gpt-4o-2024-08-06 API](https://platform.openai.com/docs/models/overview) for educational purposes. 
     """
     )
     st.sidebar.header("Version")
-    st.sidebar.markdown('June 28th, 2024')
+    st.sidebar.markdown('September 23th, 2024')
 
     
 
