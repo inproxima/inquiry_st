@@ -5,7 +5,8 @@ import streamlit_ext as ste
 import os
 from dotenv import load_dotenv
 import anthropic
-
+from pydantic import BaseModel
+from search import SearchEngine
 
 #page setting
 st.set_page_config(page_title="Inquiry Unit Planner", page_icon="🤖", initial_sidebar_state="expanded", layout="wide")
@@ -264,7 +265,32 @@ def generate_assessment_claude(lesson, temperature):
 
     return completion.content[0].text
 
+def generate_search_parameters_claude(unit_plan, temperature):
+    
 
+    completion = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        temperature=temperature,
+        max_tokens=1000,
+        system=f"""You are an expert in search query development.
+                 
+""",
+        messages=[
+            {"role": "user", "content": f"""
+                Review the following inquiry-based lesson plan: {unit_plan} and for each session generate a search quary to be used in google to find resources. 
+                I need to create 10 google search terms for this lesson plan I could use to find resources to use in my {grade} class.
+                Structure your response as a list of dictionaries with the following keys: "Session", "Search Query". Like this:
+                [
+                    <"Session": 1, "Search Query": "search term 1", "Search Query": "search term 2">,
+                    <"Session": 2, "Search Query": "search term 3", "Search Query": "search term 4">,
+                    ...
+                ]
+"""}
+        ], 
+        
+    )
+
+    return completion.content[0].text
 
 def generate_guiding_question(unit_plan, temperature):
     """Primary function using GPT-4"""
@@ -274,7 +300,7 @@ def generate_guiding_question(unit_plan, temperature):
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": """
-                    You are an expert in inquiry-based learning.
+                    You are an expert search query development.
                 """},
                 {"role": "user", "content": f"""Instructions:
                         Evaluate the following lesson: {unit_plan}. 
@@ -521,6 +547,8 @@ def generate_inquiry(prompt, temperature):
         except Exception:
             return "I apologize, but I encountered errors with both AI models. Please try again later."
 
+
+
 def generate_assessment(lesson, temperature):
     """Primary function using GPT-4"""
     try:
@@ -544,7 +572,7 @@ def generate_assessment(lesson, temperature):
 """},
             {"role": "user", "content": f"The following is the Unit plan: {lesson}." }
         ], 
-        temperature=temperature
+        temperature=temperature,
     )
 
         return completion.choices[0].message.content
@@ -553,6 +581,72 @@ def generate_assessment(lesson, temperature):
             return generate_assessment_claude(lesson, temperature)
         except Exception:
             return "I apologize, but I encountered errors with both AI models. Please try again later."
+
+class QueryExtraction(BaseModel):
+    section: str
+    query: str
+           
+
+class QueryStructure(BaseModel):
+    Section: str
+    query: list[QueryExtraction]
+    
+
+def generate_search_parameters(unit_plan, temperature, grade):
+    try:
+        client = OpenAI()
+
+        completion = client.beta.chat.completions.parse(
+            model="gpt-4o-2024-08-06",
+            messages=[
+            {"role": "system", "content": """
+                You are an expert search query development.
+
+"""},
+            {"role": "user", "content": f"""Instructions:
+
+                Review the following inquiry-based lesson plan: {unit_plan}. 
+                I want to find resources to support the lesson plan.
+                I need to create 10 google search terms for this lesson plan I could use to find resources to use in my {grade} class.
+                Refain from providing any other information. """}
+        ], 
+        temperature=temperature,
+        response_format=QueryStructure,
+    )
+        structured_response = completion.choices[0].message
+        if structured_response.parsed:
+            return structured_response.parsed
+        else:
+            return structured_response.refusal
+    except Exception:
+        try:
+            return generate_search_parameters_claude(unit_plan, temperature, grade)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
+    
+def process_search_queries(search_queries: QueryStructure):
+    search_engine = SearchEngine()
+    all_results = []
+    
+    # Access the queries from the QueryStructure object
+    for query_extraction in search_queries.query:
+        try:
+            results = search_engine.search(query_extraction.query)
+            organic_results = results.get('organic_results', [])
+            processed_results = [{
+                'query': query_extraction.query,
+                'section': query_extraction.section,
+                'title': result.get('title'),
+                'link': result.get('link'),
+                'snippet': result.get('snippet')
+            } for result in organic_results[:3]]  # Limiting to top 3 results
+            all_results.extend(processed_results)
+        except Exception as e:
+            st.error(f"Error searching for query '{query_extraction.query}': {str(e)}")
+    
+    return all_results
+
+
 
 
 if __name__ == '__main__':
@@ -629,6 +723,22 @@ if __name__ == '__main__':
         western_views = generate_western_views(unit_plan, temperature)
         st.write(western_views)
         ste.download_button("Download Western Views", western_views, "Western_Views_Analysis.txt")
+        st.subheader("Search Queries")
+        search_queries = generate_search_parameters(unit_plan, temperature, grade)
+        #st.write(search_queries)
+        
+        # Process search queries and display results
+        search_results = process_search_queries(search_queries)
+        if search_results:
+            st.subheader("Search Results")
+            for result in search_results:
+                st.markdown(f"**Section:** {result['section']}")
+                st.markdown(f"**Query:** {result['query']}")
+                st.markdown(f"[{result['title']}]({result['link']})")
+                st.write(result['snippet'])
+                st.divider()
+
+        
         
 
 
