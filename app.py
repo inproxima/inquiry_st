@@ -38,7 +38,7 @@ def generate_guiding_question_claude(unit_plan, temperature):
 
                     Evaluate the following lesson: {unit_plan}. 
                     Identify the guiding question that will drive the inquiry-based learning in this lesson: Facts, Concepts, and Debatable Questions.
-                    For example, a factual question could be: "Why doesn’t energy cycle within an ecosystem?" A conceptual question could be: "In what ways could humans impact the
+                    For example, a factual question could be: "Why doesn't energy cycle within an ecosystem?" A conceptual question could be: "In what ways could humans impact the
                     balance of this freshwater ecosystem and its biodiversity?" A debatable question could be: "Using all of the evidence and conclusions you made above, how would you rate the health of the freshwater ecosystem at FEC?"
                     """
                     }
@@ -265,7 +265,7 @@ def generate_assessment_claude(lesson, temperature):
 
     return completion.content[0].text
 
-def generate_search_parameters_claude(unit_plan, temperature):
+def generate_search_parameters_claude(unit_plan, temperature, grade):
     
 
     completion = client.messages.create(
@@ -291,6 +291,62 @@ def generate_search_parameters_claude(unit_plan, temperature):
     )
 
     return completion.content[0].text
+
+def generate_ai_integration_claude(unit_plan, temperature):
+    """
+    Fallback approach to generate AI integration suggestions via Claude for the unit plan,
+    using the same 5-level AI usage framework.
+    """
+    try:
+        # Replace this with your code for calling Claude or any other Anthropic client
+        import anthropic
+
+        # Initialize Claude client (this is just an illustrative example)
+        client = anthropic.Client(api_key="YOUR_ANTHROPIC_API_KEY")
+
+        system_prompt = """You are an educational AI integration specialist.
+You are provided with a framework consisting of five levels of AI usage:
+• Level 1: No AI
+• Level 2: AI-Assisted Planning
+• Level 3: AI-Assisted Task Completion
+• Level 4: Full AI Collaboration
+• Level 5: AI Exploration
+
+When responding, you should:
+1. Review the inquiry-based unit plan.
+2. Suggest a recommended level of AI usage (if any).
+3. Explain why that level is appropriate for the content, learning objectives, and student context.
+4. Offer a brief outline or recommendation of how generative AI could be integrated at this level.
+5. Return only the text response.
+"""
+
+        user_prompt = f"""Please review the following unit plan:
+{unit_plan}
+
+Using the 5-level AI usage framework, provide a recommended level (or levels) of AI integration and 
+explain how it can positively impact student learning in this scenario. 
+If no AI integration is beneficial, recommend Level 1. Keep your answer concise yet clear.
+"""
+
+        # Use Claude's API to send the messages
+        response = client.completion(
+            prompt=anthropic.AI_PROMPT + system_prompt +
+                   anthropic.HUMAN_PROMPT + user_prompt +
+                   anthropic.AI_PROMPT,
+            model="claude-v1",
+            temperature=temperature,
+            max_tokens_to_sample=500
+        )
+
+        # The response text is found in "completion"
+        text_response = response['completion']
+        return text_response.strip()
+
+    except Exception:
+        try:
+            return generate_ai_integration_claude(unit_plan, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 def generate_guiding_question(unit_plan, temperature):
     """Primary function using GPT-4"""
@@ -647,7 +703,90 @@ def process_search_queries(search_queries: QueryStructure):
     return all_results
 
 
+def generate_ai_integration(unit_plan, temperature):
+    """
+    Analyzes the unit_plan and provides recommended strategies for integrating
+    generative AI into the lesson, referencing the 5-level AI integration framework.
+    """
 
+    try:
+        client = OpenAI()
+
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an educational AI integration specialist. 
+                    You are provided with a framework consisting of five levels of AI usage:
+                    •Level 1: No AI
+
+                    Description: Tasks completed entirely without AI tools.
+
+                    Use Case: Ideal for foundational skills, such as handwriting, basic math, or in-person debates.
+
+                    Example: A handwritten essay in a supervised setting to assess grammar and sentence structure.
+
+                    Level 2: AI-Assisted Planning
+
+                    Description: Students use AI for brainstorming or outlining but develop the final product independently.
+
+                    Use Case: Encourages creative thinking while ensuring students engage deeply with the content.
+
+                    Example: Students use AI to generate research questions but write the report without AI.
+
+                    Level 3: AI-Assisted Task Completion
+
+                    Description: AI tools help with drafting or improving specific aspects of work while maintaining the student’s voice.
+
+                    Use Case: Develops critical evaluation skills as students assess AI-generated content.
+
+                    Example: Using AI to refine the clarity of lab reports while ensuring the conclusions are student-written.
+
+                    Level 4: Full AI Collaboration
+
+                    Description: Students leverage AI tools to solve problems and demonstrate their understanding.
+
+                    Use Case: Focuses on strategic AI use and critical thinking.
+
+                    Example: Students create AI-generated presentations, demonstrating effective tool use and content mastery.
+
+                    Level 5: AI Exploration
+
+                    Description: Encourages co-creation and innovation, pushing the boundaries of traditional assessments.
+
+                    Use Case: Best for advanced students exploring cutting-edge AI applications.
+
+                    Example: Students use AI to design a unique tool or system for solving real-world problems.
+                    When responding, you should:
+                    
+                    1. Review the inquiry-based unit plan.
+                    2. Suggest a recommended level of AI usage for each section of the unit plan.
+                    3. Explain why that level is appropriate for the content, learning objectives, and student context.
+                    4. Offer a brief outline or recommendation of how generative AI could be integrated at this level.
+                    """
+                },
+                {
+                    "role": "user",
+                    "content": f"""Please review the following unit plan:
+                    {unit_plan}
+
+                    Using the 5-level AI usage framework, provide a recommended level (or levels) of AI integration for each section of the unit plan and 
+                    explain how it can positively impact student learning in this scenario. 
+"""
+                }
+            ],
+            temperature=temperature
+        )
+
+        text_response = completion.choices[0].message.content    
+        return text_response
+    except Exception:
+        # Fallback to Claude or another AI model if GPT-based call fails
+        try:
+            return generate_ai_integration_claude(unit_plan, temperature)
+        except Exception:
+            return "I apologize, but I encountered errors with both AI models. Please try again later."
 
 if __name__ == '__main__':
     
@@ -680,63 +819,92 @@ if __name__ == '__main__':
     """
     if st.sidebar.button("Generate Unit", type="primary"):
         unit_plan = generate_inquiry(prompt, temperature)
-        st.subheader("Guiding Question")
-        guiding_question = generate_guiding_question(unit_plan, temperature)
-        st.write(guiding_question)
-        ste.download_button("Download Guiding Question", guiding_question, "Guiding_Question.txt")
-        st.divider()
-        st.subheader("Unit Plan")
-        st.write(unit_plan)
-        ste.download_button("Download Unit Plan", unit_plan, "Unit_Plan.txt")
-        st.divider()
-        st.subheader("Student Essential Knowledge")
-        essential_knowledge = generate_essential_knowledge(unit_plan, temperature)
-        st.write(essential_knowledge)
-        ste.download_button("Download StudentEssential Knowledge", essential_knowledge, "Student_Essential_Knowledge.txt")
-        st.divider()
-        st.subheader("Teacher Essential Knowledge")
-        teacher_knowledge = generate_teacher_knowledge(unit_plan, temperature)
-        st.write(teacher_knowledge)
-        ste.download_button("Download Teacher Essential Knowledge", teacher_knowledge, "Teacher_Essential_Knowledge.txt")
-        st.divider()
-        st.subheader("Assessment Plan")
-        assessment_plan = generate_assessment(unit_plan, temperature)
-        st.write(assessment_plan)
-        ste.download_button("Download Assessment Plan", assessment_plan, "Assessment_Plan.txt")
-        st.divider()
-        st.subheader("Inquiry Impact")
-        inquiry_impact = generate_inquiry_impact(unit_plan, temperature)
-        st.write(inquiry_impact)
-        ste.download_button("Download Inquiry Impact", inquiry_impact, "Inquiry_Impact.txt")
-        st.divider()
-        st.subheader("Differentiation")
-        differentiation = generate_differentiation(unit_plan, temperature)
-        st.write(differentiation)
-        ste.download_button("Download Differentiation", differentiation, "Differentiation.txt")
-        st.divider()
-        st.subheader("iPad Integration")
-        ipad = generate_ipad(unit_plan, temperature)
-        st.write(ipad)
-        ste.download_button("Download iPad Integration", ipad, "iPad_Integration.txt")
-        st.divider()
-        st.subheader("Western Views Analysis")
-        western_views = generate_western_views(unit_plan, temperature)
-        st.write(western_views)
-        ste.download_button("Download Western Views", western_views, "Western_Views_Analysis.txt")
-        st.subheader("Search Queries")
-        search_queries = generate_search_parameters(unit_plan, temperature, grade)
-        #st.write(search_queries)
-        
-        # Process search queries and display results
-        search_results = process_search_queries(search_queries)
-        if search_results:
-            st.subheader("Search Results")
-            for result in search_results:
-                st.markdown(f"**Section:** {result['section']}")
-                st.markdown(f"**Query:** {result['query']}")
-                st.markdown(f"[{result['title']}]({result['link']})")
-                st.write(result['snippet'])
-                st.divider()
+        # Create 11 tabs for the output sections
+        tabs = st.tabs([
+            "Guiding Question",
+            "Unit Plan",
+            "Student Essential Knowledge",
+            "Teacher Essential Knowledge",
+            "Assessment Plan",
+            "Inquiry Impact",
+            "Differentiation",
+            "iPad Integration",
+            "Worldviews",
+            "Search Queries",
+            "AI Integration"
+        ])
+
+        with tabs[0]:
+            st.subheader("Guiding Question")
+            guiding_question = generate_guiding_question(unit_plan, temperature)
+            st.write(guiding_question)
+            ste.download_button("Download Guiding Question", guiding_question, "Guiding_Question.txt")
+
+        with tabs[1]:
+            st.subheader("Unit Plan")
+            st.write(unit_plan)
+            ste.download_button("Download Unit Plan", unit_plan, "Unit_Plan.txt")
+
+        with tabs[2]:
+            st.subheader("Student Essential Knowledge")
+            essential_knowledge = generate_essential_knowledge(unit_plan, temperature)
+            st.write(essential_knowledge)
+            ste.download_button("Download StudentEssential Knowledge", essential_knowledge, "Student_Essential_Knowledge.txt")
+
+        with tabs[3]:
+            st.subheader("Teacher Essential Knowledge")
+            teacher_knowledge = generate_teacher_knowledge(unit_plan, temperature)
+            st.write(teacher_knowledge)
+            ste.download_button("Download Teacher Essential Knowledge", teacher_knowledge, "Teacher_Essential_Knowledge.txt")
+
+        with tabs[4]:
+            st.subheader("Assessment Plan")
+            assessment_plan = generate_assessment(unit_plan, temperature)
+            st.write(assessment_plan)
+            ste.download_button("Download Assessment Plan", assessment_plan, "Assessment_Plan.txt")
+
+        with tabs[5]:
+            st.subheader("Inquiry Impact")
+            inquiry_impact = generate_inquiry_impact(unit_plan, temperature)
+            st.write(inquiry_impact)
+            ste.download_button("Download Inquiry Impact", inquiry_impact, "Inquiry_Impact.txt")
+
+        with tabs[6]:
+            st.subheader("Differentiation")
+            differentiation = generate_differentiation(unit_plan, temperature)
+            st.write(differentiation)
+            ste.download_button("Download Differentiation", differentiation, "Differentiation.txt")
+
+        with tabs[7]:
+            st.subheader("iPad Integration")
+            ipad = generate_ipad(unit_plan, temperature)
+            st.write(ipad)
+            ste.download_button("Download iPad Integration", ipad, "iPad_Integration.txt")
+
+        with tabs[8]:
+            st.subheader("Worldviews")
+            worldviews = generate_western_views(unit_plan, temperature)
+            st.write(worldviews)
+            ste.download_button("Download Worldviews", worldviews, "Worldviews.txt")
+
+        with tabs[9]:
+            st.subheader("Web Resources")
+            search_queries = generate_search_parameters(unit_plan, temperature, grade)
+            search_results = process_search_queries(search_queries)
+            if search_results:
+                st.subheader("Web Resources")
+                for result in search_results:
+                    st.markdown(f"**Section:** {result['section']}")
+                    st.markdown(f"**Query:** {result['query']}")
+                    st.markdown(f"[{result['title']}]({result['link']})")
+                    st.write(result['snippet'])
+                    st.divider()
+
+        with tabs[10]:
+            st.subheader("AI Integration")
+            ai_integration = generate_ai_integration(unit_plan, temperature)
+            st.write(ai_integration)
+            ste.download_button("Download AI Integration", ai_integration, "AI_Integration.txt")
 
         
         
