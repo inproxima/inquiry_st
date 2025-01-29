@@ -713,10 +713,10 @@ def generate_ai_integration(unit_plan, temperature):
         client = OpenAI()
 
         completion = client.chat.completions.create(
-            model="gpt-4o",
+            model="o1",
             messages=[
                 {
-                    "role": "system",
+                    "role": "developer",
                     "content": """You are an educational AI integration specialist. 
                     You are provided with a framework consisting of five levels of AI usage:
                     •Level 1: No AI
@@ -776,7 +776,7 @@ def generate_ai_integration(unit_plan, temperature):
 """
                 }
             ],
-            temperature=temperature
+            reasoning_effort="low"
         )
 
         text_response = completion.choices[0].message.content    
