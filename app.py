@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import anthropic
 from pydantic import BaseModel
 from search import SearchEngine
+from serpapi import GoogleSearch
 
 #page setting
 st.set_page_config(page_title="Inquiry Unit Planner", page_icon="🤖", initial_sidebar_state="expanded", layout="wide")
@@ -663,7 +664,7 @@ def generate_search_parameters(unit_plan, temperature, grade):
 
                 Review the following inquiry-based lesson plan: {unit_plan}. 
                 I want to find resources to support the lesson plan.
-                I need to create 10 google search terms for this lesson plan I could use to find resources to use in my {grade} class.
+                I need to create 5 google search terms for this lesson plan I could use to find resources to use in my {grade} class.
                 Refain from providing any other information. """}
         ], 
         temperature=temperature,
@@ -702,6 +703,36 @@ def process_search_queries(search_queries: QueryStructure):
     
     return all_results
 
+def process_search_queries_video(search_queries: QueryStructure):
+    """
+    Takes a QueryStructure object containing queries and returns relevant YouTube video links
+    by using the SerpApi YouTube engine.
+    """
+    search_engine = SearchEngine()
+    all_videos = []
+    
+    for query_extraction in search_queries.query:
+        try:
+            # Pass the YouTube engine parameter alongside the query
+            # The internal 'search' method or function you implement in 'search.py' 
+            # needs to handle 'engine="youtube"' to route requests to the SerpApi YouTube engine.
+            results = search_engine.search(query_extraction.query, engine="youtube")
+            video_results = results.get('video_results', [])
+            
+            # Process only the first few results for brevity
+            processed_videos = [{
+                'section': query_extraction.section,
+                'query': query_extraction.query,
+                'title': video.get('title'),
+                'link': video.get('link'),
+                'description': video.get('descriptionSnippet'),
+            } for video in video_results[:3]]
+            
+            all_videos.extend(processed_videos)
+        except Exception as e:
+            st.error(f"Error searching for YouTube query '{query_extraction.query}': {str(e)}")
+    
+    return all_videos
 
 def generate_ai_integration(unit_plan, temperature):
     """
@@ -713,7 +744,7 @@ def generate_ai_integration(unit_plan, temperature):
         client = OpenAI()
 
         completion = client.chat.completions.create(
-            model="o1",
+            model="o3-mini",
             messages=[
                 {
                     "role": "developer",
@@ -737,7 +768,7 @@ def generate_ai_integration(unit_plan, temperature):
 
                     Level 3: AI-Assisted Task Completion
 
-                    Description: AI tools help with drafting or improving specific aspects of work while maintaining the student’s voice.
+                    Description: AI tools help with drafting or improving specific aspects of work while maintaining the student's voice.
 
                     Use Case: Develops critical evaluation skills as students assess AI-generated content.
 
@@ -771,8 +802,7 @@ def generate_ai_integration(unit_plan, temperature):
                     "content": f"""Please review the following unit plan:
                     {unit_plan}
 
-                    Using the 5-level AI usage framework, provide a recommended level (or levels) of AI integration for each section of the unit plan and 
-                    explain how it can positively impact student learning in this scenario. 
+                    Using the 5-level AI usage framework, provide recommendations for integrating AI into the unit plan. Include all 5 levels. For each level provide activity suggestion aligning with one in the lesson plan and reasoning for why that level is appropriate for that actvity, learning objectives, and student context.
 """
                 }
             ],
@@ -830,7 +860,7 @@ if __name__ == '__main__':
             "Differentiation",
             "iPad Integration",
             "Worldviews",
-            "Search Queries",
+            "Web Resources",
             "AI Integration"
         ])
 
@@ -892,12 +922,22 @@ if __name__ == '__main__':
             search_queries = generate_search_parameters(unit_plan, temperature, grade)
             search_results = process_search_queries(search_queries)
             if search_results:
-                st.subheader("Web Resources")
+                st.markdown("### Web Links")
                 for result in search_results:
                     st.markdown(f"**Section:** {result['section']}")
                     st.markdown(f"**Query:** {result['query']}")
                     st.markdown(f"[{result['title']}]({result['link']})")
                     st.write(result['snippet'])
+                    st.divider()
+
+            st.markdown("### YouTube Video Links")
+            video_results = process_search_queries_video(search_queries)
+            if video_results:
+                for video in video_results:
+                    st.markdown(f"**Section:** {video['section']}")
+                    st.markdown(f"**Query:** {video['query']}")
+                    st.markdown(f"[{video['title']}]({video['link']})")
+                    st.write(video['description'] or "No description available.")
                     st.divider()
 
         with tabs[10]:
