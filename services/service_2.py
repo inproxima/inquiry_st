@@ -6,10 +6,15 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import anthropic  # For fallback calls
 import os
+import logging
 
 from daos.unit_plan_dao import UnitPlanDAO
 from entities.unit_plan import UnitPlan
 from constants import APP_OPENAI_MODEL, APP_OPENAI_MODEL_2, APP_OPENAI_MODEL_3
+
+from pydantic import BaseModel
+from search import SearchEngine
+from serpapi import GoogleSearch
 
 load_dotenv(override=True)
 
@@ -1065,4 +1070,72 @@ async def remove_unit_plans(unit_plan_id: int):
     Deletes a UnitPlan record from the data store by ID.
     """
     await UnitPlanDAO().delete(unit_plan_id)
-    print(f"Removed unit plan {unit_plan_id}") 
+    print(f"Removed unit plan {unit_plan_id}")
+
+# Add these two classes for query structures
+class QueryExtraction(BaseModel):
+    section: str
+    query: str
+           
+class QueryStructure(BaseModel):
+    Section: str
+    query: List[QueryExtraction]
+
+
+async def process_search_queries(search_queries: QueryStructure) -> List[dict]:
+    """
+    Takes a QueryStructure object containing web search queries and returns
+    relevant web page results by using the SearchEngine.
+    Limiting to top 3 results per query for brevity.
+    """
+    # Use your actual SearchEngine implementation
+    search_engine = SearchEngine()
+    all_results = []
+
+    for query_extraction in search_queries.query:
+        try:
+            results = search_engine.search(query_extraction.query)
+            organic_results = results.get('organic_results', [])
+            processed_results = [{
+                'query': query_extraction.query,
+                'section': query_extraction.section,
+                'title': result.get('title'),
+                'link': result.get('link'),
+                'snippet': result.get('snippet')
+            } for result in organic_results[:3]]  # Limiting to top 3 results
+            all_results.extend(processed_results)
+        except Exception as e:
+            # Handle or log the error appropriately
+            logging.error(f"Error searching for query '{query_extraction.query}': {str(e)}")
+
+    return all_results
+
+
+async def process_search_queries_video(search_queries: QueryStructure) -> List[dict]:
+    """
+    Takes a QueryStructure object containing YouTube queries and returns relevant
+    YouTube video links by using the SerpApi (or your chosen service) YouTube engine.
+    Limiting to top 3 results per query for brevity.
+    """
+    # Use your actual SearchEngine implementation
+    search_engine = SearchEngine()
+    all_videos = []
+
+    for query_extraction in search_queries.query:
+        try:
+            # Pass the YouTube engine parameter alongside the query
+            results = search_engine.search(query_extraction.query, engine="youtube")
+            video_results = results.get('video_results', [])
+            processed_videos = [{
+                'section': query_extraction.section,
+                'query': query_extraction.query,
+                'title': video.get('title'),
+                'link': video.get('link'),
+                'description': video.get('descriptionSnippet')
+            } for video in video_results[:3]]  # Limiting to top 3 results
+            all_videos.extend(processed_videos)
+        except Exception as e:
+            # Handle or log the error appropriately
+            logging.error(f"Error searching for YouTube query '{query_extraction.query}': {str(e)}")
+
+    return all_videos 
