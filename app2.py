@@ -736,7 +736,7 @@ def process_search_queries_video(search_queries: QueryStructure):
             search = GoogleSearch(params)
             results = search.get_dict()
             print(results)
-            video_results = results.get("video_results", [])
+            video_results = results["video_results"]
 
             # Process only the first 3 video results
             processed_videos = [{
@@ -744,7 +744,7 @@ def process_search_queries_video(search_queries: QueryStructure):
                 "query": query_extraction.query,
                 "title": video.get("title"),
                 "link": video.get("link"),
-                "description": video.get("descriptionSnippet")
+                "description": video.get("description")
             } for video in video_results[:3]]
 
             all_videos.extend(processed_videos)

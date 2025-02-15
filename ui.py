@@ -1,8 +1,9 @@
 import streamlit as st
 import streamlit_ext as ste
+import os
 
-# Import the necessary functions from app.py
-from app import (
+# Import the updated functions from app2.py instead of app.py
+from app2 import (
     generate_inquiry,
     generate_guiding_question,
     generate_essential_knowledge,
@@ -14,6 +15,7 @@ from app import (
     generate_western_views,
     generate_search_parameters,
     process_search_queries,
+    process_search_queries_video,
     generate_ai_integration,
 )
 
@@ -55,16 +57,16 @@ def render_ui():
     if on:
         user_context = st.sidebar.text_area("Please provide context that you would like to be included in the unit plan.")
         prompt = f"""Develop an inquiry-based lesson plan for {grade} that aligns with the following curricular outcomes: {outcomes}.
-The lesson should embed the principles of authentic and meaningful tasks, student-centered learning, collaborative learning, 
-an interdisciplinary approach, critical thinking and problem-solving, ongoing assessment and feedback, the teacher as facilitator, 
-and reflective practice. 
+The lesson should embed the principles of authentic and meaningful tasks, student-centered learning, collaborative learning,
+an interdisciplinary approach, critical thinking and problem-solving, ongoing assessment and feedback, 
+the teacher as facilitator, and reflective practice.
 Ensure that the scenario includes the following consideration: {user_context}.
 """
     else:
         prompt = f"""Develop an inquiry-based lesson plan for {grade} that aligns with the following curricular outcomes: {outcomes}.
-The lesson should embed the principles of authentic and meaningful tasks, student-centered learning, collaborative learning, 
-an interdisciplinary approach, critical thinking and problem-solving, ongoing assessment and feedback, the teacher as facilitator, 
-and reflective practice.
+The lesson should embed the principles of authentic and meaningful tasks, student-centered learning, collaborative learning,
+an interdisciplinary approach, critical thinking and problem-solving, ongoing assessment and feedback, 
+the teacher as facilitator, and reflective practice.
 """
 
     if st.sidebar.button("Generate Unit", type="primary"):
@@ -82,7 +84,7 @@ and reflective practice.
             "Differentiation",
             "iPad Integration",
             "Worldviews",
-            "Search Queries",
+            "Web Resources",
             "AI Integration"
         ])
 
@@ -151,18 +153,33 @@ and reflective practice.
         # 10. Web Resources
         with tabs[9]:
             st.subheader("Web Resources")
+            # Generate query structure
             search_queries = generate_search_parameters(unit_plan, temperature, grade)
+
             if isinstance(search_queries, str):
-                # If it's a string, it's likely an error message or fallback
+                # If it's a string, handle it gracefully
                 st.write(search_queries)
             else:
+                # Process standard Web search queries
                 search_results = process_search_queries(search_queries)
                 if search_results:
+                    st.markdown("### Web Links")
                     for result in search_results:
                         st.markdown(f"**Section:** {result['section']}")
                         st.markdown(f"**Query:** {result['query']}")
                         st.markdown(f"[{result['title']}]({result['link']})")
                         st.write(result['snippet'])
+                        st.divider()
+
+                # Process YouTube video links
+                st.markdown("### YouTube Video Links")
+                video_results = process_search_queries_video(search_queries)
+                if video_results:
+                    for video in video_results:
+                        st.markdown(f"**Section:** {video['section']}")
+                        st.markdown(f"**Query:** {video['query']}")
+                        st.markdown(f"[{video['title']}]({video['link']})")
+                        st.markdown(f"**Description:** {video['description']}")
                         st.divider()
 
         # 11. AI Integration
@@ -186,7 +203,6 @@ and reflective practice.
     )
     st.sidebar.header("Version")
     st.sidebar.markdown('September 23th, 2024')
-
 
 # Run the UI
 if __name__ == "__main__":
