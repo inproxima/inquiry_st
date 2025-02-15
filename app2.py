@@ -10,6 +10,8 @@ from search import SearchEngine
 from serpapi import GoogleSearch
 
 #page setting
+
+# --- front-end
 st.set_page_config(page_title="Inquiry Unit Planner", page_icon="🤖", initial_sidebar_state="expanded", layout="wide")
 
 hide_st_style = """
@@ -20,6 +22,7 @@ hide_st_style = """
         </style>
 """
 
+# ---- backend
 #OpenAI APA Key
 load_dotenv()
 OpenAI.api_key = os.getenv("OPENAI_API_KEY")
@@ -837,6 +840,15 @@ def generate_ai_integration(unit_plan, temperature):
         except Exception:
             return "I apologize, but I encountered errors with both AI models. Please try again later."
 
+
+def generate_web_resources(unit_plan, temperature, grade):
+    search_queries = generate_search_parameters(unit_plan, temperature, grade)
+    search_results = process_search_queries(search_queries)
+    video_results = process_search_queries_video(search_queries)
+
+    return search_results, video_results
+
+
 if __name__ == '__main__':
     
     #Sidebar settings
@@ -938,8 +950,7 @@ if __name__ == '__main__':
 
         with tabs[9]:
             st.subheader("Web Resources")
-            search_queries = generate_search_parameters(unit_plan, temperature, grade)
-            search_results = process_search_queries(search_queries)
+            search_results, video_results = generate_web_resources(unit_plan, temperature, grade)
             if search_results:
                 st.markdown("### Web Links")
                 for result in search_results:
@@ -950,7 +961,6 @@ if __name__ == '__main__':
                     st.divider()
 
             st.markdown("### YouTube Video Links")
-            video_results = process_search_queries_video(search_queries)
             if video_results:
                 for video in video_results:
                     st.markdown(f"**Section:** {video['section']}")
