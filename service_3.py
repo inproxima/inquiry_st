@@ -10,7 +10,7 @@ import logging
 
 from daos.unit_plan_dao import UnitPlanDAO
 from entities.unit_plan import UnitPlan
-from constants import APP_OPENAI_MODEL, APP_OPENAI_MODEL_2, APP_OPENAI_MODEL_3, APP_OPENAI_MODEL_4
+from services.constants import APP_OPENAI_MODEL, APP_OPENAI_MODEL_2, APP_OPENAI_MODEL_3, APP_OPENAI_MODEL_4
 
 from pydantic import BaseModel
 from search import SearchEngine
@@ -1051,8 +1051,8 @@ async def generate_search_parameters(unit_plan: UnitPlan) -> str:
     print("search_parameters started")
 
     prompt = f"""Review the following inquiry-based lesson plan: {unit_plan.unit_plan} 
-                 and for each session generate a search query to be used in Google to find resources. 
-                 I need to create 10 google search terms for this lesson plan I could use to find resources 
+                 I want to find resources to support the lesson plan. 
+                 I need to create 5 google search terms for this lesson plan I could use to find resources 
                  to use in my {unit_plan.grade} class.
                  Structure your response as a list of dictionaries with the following keys: 
                  "Session", "Search Query".
