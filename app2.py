@@ -827,7 +827,7 @@ def generate_ai_integration(unit_plan, temperature):
 """
                 }
             ],
-            reasoning_effort="low"
+            reasoning_effort="medium"
         )
 
         text_response = completion.choices[0].message.content    

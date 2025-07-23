@@ -31,6 +31,7 @@ APP_OPENAI_MODEL_2 = "o1"
 APP_OPENAI_MODEL_3 = "o3-mini"
 APP_OPENAI_MODEL_4 = "gpt-4o-2024-08-06"
 
+
 # ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 # CLAUDE_MODEL = "claude-3-5-sonnet-20240620"
 # Cognito User Roles
